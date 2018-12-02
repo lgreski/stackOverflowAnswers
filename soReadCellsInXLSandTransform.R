@@ -46,3 +46,24 @@ tidyData$group <- group
 tidyData$year <- year
 
 tidyData 
+
+# read second worksheet to illustrate multiple reads 
+
+# set constants 
+typeOfLeave <- "sick"
+group <- "self employed"
+year <- "2017"
+
+theData <- read_excel(destinationFile,sheet=year,range="A5:AW9",col_names=theCols)
+
+# use tidyr / dplyr to transform the data
+theData %>% gather(.,key="key",value="Amount",2:49) %>% separate(.,key,into=c("Sex","Age","Quarter"),sep="_") -> tidyData
+
+# assign constants
+
+tidyData$typeOfLeave <- typeOfLeave
+tidyData$group <- group
+tidyData$year <- year
+
+tidyData 
+
