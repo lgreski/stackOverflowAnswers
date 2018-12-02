@@ -19,21 +19,30 @@ library(tidyr)
 # set constants 
 typeOfLeave <- "sick"
 group <- "self employed"
+year <- "2018"
 
-# read date and extract the value
-theDate <- read_excel(destinationFile,range="A2:A2",col_names=FALSE)[[1]]
-
-# setup column names using underscore so we can separate key column into Sex and Age columns 
-theCols <- c("Country","both_all","women_all","men_all","both_up to 17","women_up to 17","men_up to 17")
-theData <- read_excel(destinationFile,range="A5:G9",col_names=theCols)
+# setup column names using underscore so we can separate key column into Sex, Age, and Quarter columns 
+theCols <- c("Country","both_all_Q1","women_all_Q1","men_all_Q1","both_up to 17_Q1","women_up to 17_Q1","men_up to 17_Q1",
+             "both_18 to 64_Q1","women_18 to 64_Q1","men_18 to 64_Q1",
+             "both_65 and over_Q1","women_65 and over_Q1","men_65 and over_Q1",
+             "both_all_Q2","women_all_Q2","men_all_Q2","both_up to 17_Q2","women_up to 17_Q2","men_up to 17_Q2",
+             "both_18 to 64_Q2","women_18 to 64_Q2","men_18 to 64_Q2",
+             "both_65 and over_Q2","women_65 and over_Q2","men_65 and over_Q2",
+             "both_all_Q3","women_all_Q3","men_all_Q3","both_up to 17_Q3","women_up to 17_Q3","men_up to 17_Q3",
+             "both_18 to 64_Q3","women_18 to 64_Q3","men_18 to 64_Q3",
+             "both_65 and over_Q3","women_65 and over_Q3","men_65 and over_Q3",
+             "both_all_Q4","women_all_Q4","men_all_Q4","both_up to 17_Q4","women_up to 17_Q4","men_up to 17_Q4",
+             "both_18 to 64_Q4","women_18 to 64_Q4","men_18 to 64_Q4",
+             "both_65 and over_Q4","women_65 and over_Q4","men_65 and over_Q4")
+theData <- read_excel(destinationFile,sheet=year,range="A5:AW9",col_names=theCols)
 
 # use tidyr / dplyr to transform the data
-theData %>% gather(.,key="key",value="Amount",2:7) %>% separate(.,key,into=c("Sex","Age"),sep="_") -> tidyData
+theData %>% gather(.,key="key",value="Amount",2:49) %>% separate(.,key,into=c("Sex","Age","Quarter"),sep="_") -> tidyData
 
 # assign constants
 
 tidyData$typeOfLeave <- typeOfLeave
 tidyData$group <- group
-tidyData$date <- theDate
+tidyData$year <- year
 
 tidyData 
