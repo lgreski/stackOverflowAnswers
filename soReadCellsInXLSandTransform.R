@@ -22,18 +22,14 @@ group <- "self employed"
 year <- "2018"
 
 # setup column names using underscore so we can separate key column into Sex, Age, and Quarter columns 
-theCols <- c("Country","both_all_Q1","women_all_Q1","men_all_Q1","both_up to 17_Q1","women_up to 17_Q1","men_up to 17_Q1",
-             "both_18 to 64_Q1","women_18 to 64_Q1","men_18 to 64_Q1",
-             "both_65 and over_Q1","women_65 and over_Q1","men_65 and over_Q1",
-             "both_all_Q2","women_all_Q2","men_all_Q2","both_up to 17_Q2","women_up to 17_Q2","men_up to 17_Q2",
-             "both_18 to 64_Q2","women_18 to 64_Q2","men_18 to 64_Q2",
-             "both_65 and over_Q2","women_65 and over_Q2","men_65 and over_Q2",
-             "both_all_Q3","women_all_Q3","men_all_Q3","both_up to 17_Q3","women_up to 17_Q3","men_up to 17_Q3",
-             "both_18 to 64_Q3","women_18 to 64_Q3","men_18 to 64_Q3",
-             "both_65 and over_Q3","women_65 and over_Q3","men_65 and over_Q3",
-             "both_all_Q4","women_all_Q4","men_all_Q4","both_up to 17_Q4","women_up to 17_Q4","men_up to 17_Q4",
-             "both_18 to 64_Q4","women_18 to 64_Q4","men_18 to 64_Q4",
-             "both_65 and over_Q4","women_65 and over_Q4","men_65 and over_Q4")
+# after using rep() to build data with required repeating patterns, avoiding manual typing of all the column names 
+sex <- rep(c("both","women","men"),16)
+age <- rep(c(rep("all",3),rep("up to 17",3),rep("18 to 64",3),rep("65 and over",3)),4)
+quarter <- c(rep("Q1",12),rep("Q2",12),rep("Q3",12),rep("Q4",12))
+data.frame(sex,age,quarter) %>% unite(excelColNames) -> columnsData
+theCols <- unlist(c("Country",columnsData["excelColNames"]))
+
+# read data with readxl::read_excel() 
 theData <- read_excel(destinationFile,sheet=year,range="A5:AW9",col_names=theCols)
 
 # use tidyr / dplyr to transform the data
@@ -66,4 +62,49 @@ tidyData$group <- group
 tidyData$year <- year
 
 tidyData 
+
+
+## version that combines multiple years into a single narrow format tidy data file
+# download file from github to make script completely reproducible
+
+sourceFile <- "https://raw.githubusercontent.com/lgreski/stackoverflowanswers/master/data/soQuestion53446800.xlsx"
+destinationFile <- "./soQuestion53446800.xlsx"
+download.file(sourceFile,destinationFile,mode="wb")
+
+
+library(readxl)
+library(tidyr)
+
+# set constants
+years <- c("2017","2018")
+typeOfLeave <- "sick"
+group <- "self employed"
+
+# setup column names using underscore so we can separate key column into Sex, Age, and Quarter columns 
+# after using rep() to build data with required repeating patterns, avoiding manual typing of all the column names 
+sex <- rep(c("both","women","men"),16)
+age <- rep(c(rep("all",3),rep("up to 17",3),rep("18 to 64",3),rep("65 and over",3)),4)
+quarter <- c(rep("Q1",12),rep("Q2",12),rep("Q3",12),rep("Q4",12))
+data.frame(sex,age,quarter) %>% unite(excelColNames) -> columnsData
+theCols <- unlist(c("Country",columnsData["excelColNames"]))
+
+
+lapply(years,function(x){
+  theData <- read_excel(destinationFile,sheet=x,range="A5:AW9",col_names=theCols)
+  
+  # use tidyr / dplyr to transform the data
+  theData %>% gather(.,key="key",value="Amount",2:49) %>% separate(.,key,into=c("Sex","Age","Quarter"),sep="_") -> tidyData
+  
+  # assign constants
+  
+  tidyData$typeOfLeave <- typeOfLeave
+  tidyData$group <- group
+  tidyData$year <- x
+  
+  tidyData
+}) %>% do.call(rbind,.) -> combinedData
+
+head(combinedData)
+tail(combinedData)
+
 
